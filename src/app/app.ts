@@ -4,7 +4,7 @@ import { Authentication } from './authentication/authentication';
 
 @Component({
   selector: 'app-root',
-  imports: [Authentication],
+  imports: [Authentication,RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

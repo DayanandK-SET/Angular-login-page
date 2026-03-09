@@ -1,69 +1,93 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LoginModel } from './Models/LoginModel';
 import { RegisterModel } from './Models/RegisterModel';
 import { APIAuthenactionService } from '../Services/api.Authentication.Service';
+import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs/operators';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-authentication',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './authentication.html',
-  styleUrl: './authentication.css',
+  styleUrls: ['./authentication.css'],
 })
 export class Authentication {
+
   loginModel: LoginModel;
   registerModel: RegisterModel;
 
-  private apiAuthService: APIAuthenactionService=inject(APIAuthenactionService);
+  activeTab: string = 'login';
+
+  loginError: string = '';
+  registerError: string = '';
+
+  isLoginLoading: boolean = false;
+  isRegisterLoading: boolean = false;
+
+  private apiAuthService: APIAuthenactionService = inject(APIAuthenactionService);
+  private cd: ChangeDetectorRef = inject(ChangeDetectorRef);
+
   constructor(){
     this.loginModel = new LoginModel();
     this.registerModel = new RegisterModel();
   }
 
   login(){
-    console.log(this.loginModel);
-    this.apiAuthService.apiLogin(this.loginModel).subscribe({
+    this.loginError = '';
+    this.isLoginLoading = true;
+
+    this.apiAuthService.apiLogin(this.loginModel)
+    .pipe(
+      finalize(() => {
+        this.isLoginLoading = false;
+        this.cd.detectChanges();
+      })
+    )
+    .subscribe({
       next:(response:any)=>{
         if(response){
-         // localStorage.setItem('token', response?.token);//local Storage
- 
-          sessionStorage.setItem('token',response?.token)//session storage
- 
-          alert('Login successful!');
-         
+          sessionStorage.setItem('token',response?.token);
+          alert('Login Successful')
         }
       },
       error:(error)=>{
-        alert('Login failed: ' + error.message);
-      },
-      complete:()=>{
-        console.log('Login request completed');
+        if(error.status === 401){
+          this.loginError = 'Invalid username or password';
+        }
+        else{
+          this.loginError = 'Something went wrong. Please try again.';
+        }
       }
     });
   }
 
+  register(){
+    this.registerError = '';
+    this.isRegisterLoading = true;
 
-    register(){
-    console.log(this.registerModel);
-    this.apiAuthService.apiRegister(this.registerModel).subscribe({
+    this.apiAuthService.apiRegister(this.registerModel)
+    .pipe(
+      finalize(() => {
+        this.isRegisterLoading = false;
+        this.cd.detectChanges();
+      })
+    )
+    .subscribe({
       next:(response:any)=>{
         if(response){
-         // localStorage.setItem('token', response?.token);//local Storage
- 
-          sessionStorage.setItem('token',response?.token)//session storage
- 
+          sessionStorage.setItem('token',response?.token);
           alert('Register successful!');
-         
         }
       },
       error:(error)=>{
-  console.log(error);
-  console.log(error.error);
-
-  alert('Register failed');
-},
-      complete:()=>{
-        console.log('Register request completed');
+        if(error.status === 400){
+          this.registerError = error.error?.message || 'Registration failed';
+        }
+        else{
+          this.registerError = 'Something went wrong.';
+        }
       }
     });
   }
