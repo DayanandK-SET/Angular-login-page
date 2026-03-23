@@ -26,7 +26,7 @@ export class PublicSurvey {
 
   publicIdentifier = '';
 
-  // ── Page State ───────────────────────────────────
+  //  Page State 
   isLoading = signal(true);
   survey = signal<PublicSurveyDto | null>(null);
   errorMessage = signal('');      // survey not found / expired / closed
@@ -35,7 +35,7 @@ export class PublicSurvey {
   isSubmitting = signal(false);
   submitError = signal('');
 
-  // ── Answers map: questionId → answer value ───────
+  //  Answers map: questionId → answer value 
   // text/rating   → string
   // multipleChoice → number (selectedOptionId)
   answers: Map<number, string | number> = new Map();
@@ -49,7 +49,7 @@ export class PublicSurvey {
     this.loadSurvey();
   }
 
-  // ── Duplicate Prevention ─────────────────────────
+  //  Duplicate Prevention 
   // Store the token in localStorage keyed by publicIdentifier.
   // On load, if a token exists AND was already submitted, block re-submission.
 
@@ -77,7 +77,7 @@ export class PublicSurvey {
     }
   }
 
-  // ── Load Survey ───────────────────────────────────
+  //  Load Survey 
 
   loadSurvey() {
     this.isLoading.set(true);
@@ -106,7 +106,7 @@ export class PublicSurvey {
     });
   }
 
-  // ── Answer Helpers ────────────────────────────────
+  //  Answer Helpers 
 
   getTextAnswer(questionId: number): string {
     return (this.answers.get(questionId) as string) ?? '';
@@ -143,11 +143,10 @@ export class PublicSurvey {
   // Rating stars array for a given max
   ratingRange(question: PublicQuestionDto): number[] {
     // Backend stores rating as 1-10 by default
-    // We'll show 1–10 scale as individual clickable numbers
     return Array.from({ length: 10 }, (_, i) => i + 1);
   }
 
-  // ── Submit ────────────────────────────────────────
+  //  Submit 
 
   submitSurvey() {
     this.unanswered.clear();
@@ -200,7 +199,6 @@ export class PublicSurvey {
       error: (err) => {
         this.isSubmitting.set(false);
 
-        // With responseType:'text', err.error is always a raw string.
         // Backend error middleware returns JSON: {"success":false,"message":"..."}
         // Backend controller returns plain string: "You have already submitted..."
         let msg = '';

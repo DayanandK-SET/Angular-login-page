@@ -25,7 +25,7 @@ export class Analytics {
 
   surveyId!: number;
 
-  // ── Data ─────────────────────────────────────────
+  // Data 
   analytics = signal<SurveyAnalyticsDto | null>(null);
   trend = signal<ResponseTrendDto[]>([]);
   isLoading = signal(true);
@@ -38,7 +38,7 @@ export class Analytics {
     this.loadTrend();
   }
 
-  // ── Load ──────────────────────────────────────────
+  //  Load 
 
   loadAnalytics() {
     this.isLoading.set(true);
@@ -67,7 +67,7 @@ export class Analytics {
     });
   }
 
-  // ── Bar Chart Helpers ─────────────────────────────
+  //  Bar Chart Helpers 
 
   getBarWidth(count: number, question: QuestionAnalyticsDto): number {
     const max = Math.max(...(question.options ?? []).map(o => o.count), 1);
@@ -84,7 +84,7 @@ export class Analytics {
     return Math.round((count / total) * 100);
   }
 
-  // ── Rating Helpers ────────────────────────────────
+  //  Rating Helpers 
 
   getRatingColor(avg: number, max: number): string {
     const ratio = avg / max;
@@ -188,7 +188,7 @@ export class Analytics {
     return `M ${firstX},${bottom} L ${points.join(' L ')} L ${lastX},${bottom} Z`;
   }
 
-  // ── Type Helpers ──────────────────────────────────
+  //  Type Helpers 
 
   getTypeName(type: QuestionType): string {
     const map: Record<number, string> = {

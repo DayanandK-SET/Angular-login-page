@@ -79,7 +79,7 @@
 
         <!-- Rating hint -->
         <div class="rating-hint" *ngIf="q.questionType === QuestionType.Rating">
-          Scale: 1 — 5 ⭐
+          Scale: 1 — 10 ⭐
         </div>
 
       </div>
@@ -133,7 +133,7 @@
         <label>Question Type <span class="required">*</span></label>
         <select class="form-input" [(ngModel)]="newQuestion.questionType">
           <option [ngValue]="QuestionType.Text">✏️ Text</option>
-          <option [ngValue]="QuestionType.Rating">⭐ Rating (1–5)</option>
+          <option [ngValue]="QuestionType.Rating">⭐ Rating (1–10)</option>
           <option [ngValue]="QuestionType.MultipleChoice">☑️ Multiple Choice</option>
         </select>
       </div>
@@ -188,7 +188,7 @@
       <!-- Rating info -->
       <div class="rating-info" *ngIf="newQuestion.questionType === QuestionType.Rating">
         <span>ℹ️</span>
-        <span>Respondents will rate on a scale of <strong>1 to 5</strong>.</span>
+        <span>Respondents will rate on a scale of <strong>1 to 10</strong>.</span>
       </div>
 
       <!-- Error -->

@@ -108,7 +108,14 @@
             </div>
 
           </div>
-<div class="text-danger mb-2" *ngIf="loginError">
+<div 
+  class="mb-2"
+  [ngClass]="{
+    'text-danger': loginError.includes('Invalid'),
+    'text-success': loginError.includes('successful')
+  }"
+  *ngIf="loginError"
+>
   {{loginError}}
 </div>
           <!-- LOGIN BUTTON -->

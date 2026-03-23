@@ -39,28 +39,23 @@
 
   <!-- ── TABS ──────────────────────────────────────── -->
   <div class="tabs">
-    <button
-      class="tab-btn"
-      [class.active]="activeTab() === 'creators'"
-      (click)="setTab('creators')"
-    >
+    <button class="tab-btn" [class.active]="activeTab() === 'creators'" (click)="setTab('creators')">
       👥 Creators ({{ totalCreators }})
     </button>
-    <button
-      class="tab-btn"
-      [class.active]="activeTab() === 'surveys'"
-      (click)="setTab('surveys')"
-    >
+    <button class="tab-btn" [class.active]="activeTab() === 'surveys'" (click)="setTab('surveys')">
       📋 All Surveys ({{ totalSurveys }})
     </button>
+    <button class="tab-btn" [class.active]="activeTab() === 'auditLogs'" (click)="setTab('auditLogs')">
+      🕵️ Audit Logs
+    </button>
   </div>
+
 
   <!-- ══════════════════════════════════════════════ -->
   <!-- CREATORS TAB                                  -->
   <!-- ══════════════════════════════════════════════ -->
   <div *ngIf="activeTab() === 'creators'">
 
-    <!-- Search -->
     <div class="search-bar">
       <input
         type="text"
@@ -68,29 +63,33 @@
         placeholder="🔍 Search by username or email..."
         [(ngModel)]="creatorSearch"
         [ngModelOptions]="{standalone: true}"
+        (ngModelChange)="onCreatorSearchChange()"
       >
     </div>
 
-    <!-- Loading -->
     <div class="loading-state" *ngIf="creatorsLoading()">
       <div class="spinner-border text-primary"></div>
       <p>Loading creators...</p>
     </div>
 
-    <!-- Error -->
     <div class="alert-error" *ngIf="creatorsError()">
       {{ creatorsError() }}
       <button class="btn-retry" (click)="loadCreators()">Retry</button>
     </div>
 
-    <!-- Empty -->
     <div class="empty-state" *ngIf="!creatorsLoading() && filteredCreators.length === 0 && !creatorsError()">
       <div class="empty-icon">👥</div>
       <p>{{ creatorSearch ? 'No creators match your search.' : 'No creators registered yet.' }}</p>
     </div>
 
-    <!-- Table -->
     <div class="table-card" *ngIf="!creatorsLoading() && filteredCreators.length > 0">
+
+      <!-- Row count -->
+      <div class="table-row-info">
+        Showing {{ (creatorPage - 1) * creatorPageSize + 1 }}–{{ Math.min(creatorPage * creatorPageSize, filteredCreators.length) }}
+        of {{ filteredCreators.length }} creator(s)
+      </div>
+
       <div class="table-responsive">
         <table>
           <thead>
@@ -102,9 +101,9 @@
             </tr>
           </thead>
           <tbody>
-            @for (creator of filteredCreators; track creator.id; let i = $index) {
+            @for (creator of creatorPagedItems; track creator.id; let i = $index) {
               <tr>
-                <td class="id-cell">{{ creator.id }}</td>
+                <td class="id-cell">{{ (creatorPage - 1) * creatorPageSize + i + 1 }}</td>
                 <td>
                   <div class="user-info">
                     <div class="user-avatar">{{ creator.username[0].toUpperCase() }}</div>
@@ -113,10 +112,7 @@
                 </td>
                 <td class="email-cell">{{ creator.email }}</td>
                 <td>
-                  <button
-                    class="btn-delete"
-                    (click)="openDeleteModal('creator', creator.id, creator.username)"
-                  >
+                  <button class="btn-delete" (click)="openDeleteModal('creator', creator.id, creator.username)">
                     🗑️ Delete
                   </button>
                 </td>
@@ -125,16 +121,31 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="creatorTotalPages > 1">
+        <button class="btn-page" (click)="creatorPage = creatorPage - 1" [disabled]="creatorPage === 1">← Prev</button>
+        @for (page of creatorPageNumbers; track page) {
+          <button
+            class="btn-page-num"
+            [class.active]="page === creatorPage"
+            (click)="creatorPage = page"
+          >{{ page }}</button>
+        }
+        <button class="btn-page" (click)="creatorPage = creatorPage + 1" [disabled]="creatorPage === creatorTotalPages">Next →</button>
+        <span class="page-info">Page {{ creatorPage }} of {{ creatorTotalPages }}</span>
+      </div>
+
     </div>
 
   </div>
+
 
   <!-- ══════════════════════════════════════════════ -->
   <!-- SURVEYS TAB                                   -->
   <!-- ══════════════════════════════════════════════ -->
   <div *ngIf="activeTab() === 'surveys'">
 
-    <!-- Search -->
     <div class="search-bar">
       <input
         type="text"
@@ -142,29 +153,33 @@
         placeholder="🔍 Search by title or creator..."
         [(ngModel)]="surveySearch"
         [ngModelOptions]="{standalone: true}"
+        (ngModelChange)="onSurveySearchChange()"
       >
     </div>
 
-    <!-- Loading -->
     <div class="loading-state" *ngIf="surveysLoading()">
       <div class="spinner-border text-primary"></div>
       <p>Loading surveys...</p>
     </div>
 
-    <!-- Error -->
     <div class="alert-error" *ngIf="surveysError()">
       {{ surveysError() }}
       <button class="btn-retry" (click)="loadSurveys()">Retry</button>
     </div>
 
-    <!-- Empty -->
     <div class="empty-state" *ngIf="!surveysLoading() && filteredSurveys.length === 0 && !surveysError()">
       <div class="empty-icon">📋</div>
       <p>{{ surveySearch ? 'No surveys match your search.' : 'No surveys created yet.' }}</p>
     </div>
 
-    <!-- Table -->
     <div class="table-card" *ngIf="!surveysLoading() && filteredSurveys.length > 0">
+
+      <!-- Row count -->
+      <div class="table-row-info">
+        Showing {{ (surveyPage - 1) * surveyPageSize + 1 }}–{{ Math.min(surveyPage * surveyPageSize, filteredSurveys.length) }}
+        of {{ filteredSurveys.length }} survey(s)
+      </div>
+
       <div class="table-responsive">
         <table>
           <thead>
@@ -177,27 +192,20 @@
             </tr>
           </thead>
           <tbody>
-            @for (survey of filteredSurveys; track survey.id) {
+            @for (survey of surveyPagedItems; track survey.id; let i = $index) {
               <tr>
-                <td class="id-cell">{{ survey.id }}</td>
+                <td class="id-cell">{{ (surveyPage - 1) * surveyPageSize + i + 1 }}</td>
                 <td class="title-cell">{{ survey.title }}</td>
                 <td>
                   <div class="creator-chip">{{ survey.creator }}</div>
                 </td>
                 <td>
-                  <span
-                    class="status-badge"
-                    [class.active]="survey.isActive"
-                    [class.inactive]="!survey.isActive"
-                  >
+                  <span class="status-badge" [class.active]="survey.isActive" [class.inactive]="!survey.isActive">
                     {{ survey.isActive ? '● Active' : '○ Inactive' }}
                   </span>
                 </td>
                 <td>
-                  <button
-                    class="btn-delete"
-                    (click)="openDeleteModal('survey', survey.id, survey.title)"
-                  >
+                  <button class="btn-delete" (click)="openDeleteModal('survey', survey.id, survey.title)">
                     🗑️ Delete
                   </button>
                 </td>
@@ -206,6 +214,155 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="surveyTotalPages > 1">
+        <button class="btn-page" (click)="surveyPage = surveyPage - 1" [disabled]="surveyPage === 1">← Prev</button>
+        @for (page of surveyPageNumbers; track page) {
+          <button
+            class="btn-page-num"
+            [class.active]="page === surveyPage"
+            (click)="surveyPage = page"
+          >{{ page }}</button>
+        }
+        <button class="btn-page" (click)="surveyPage = surveyPage + 1" [disabled]="surveyPage === surveyTotalPages">Next →</button>
+        <span class="page-info">Page {{ surveyPage }} of {{ surveyTotalPages }}</span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- AUDIT LOGS TAB                                -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div *ngIf="activeTab() === 'auditLogs'">
+
+    <!-- Search + Date Filters + Refresh -->
+    <div class="filter-card">
+
+      <div class="filter-title">🔍 Filter Audit Logs</div>
+
+      <div class="filter-grid">
+
+        <div class="filter-group">
+          <label>Search</label>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Creator, survey title or action..."
+            [(ngModel)]="auditLogSearch"
+            [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onAuditSearchChange()"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label>From Date</label>
+          <input type="date" class="form-input" [(ngModel)]="auditFromDate">
+        </div>
+
+        <div class="filter-group">
+          <label>To Date</label>
+          <input type="date" class="form-input" [(ngModel)]="auditToDate">
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-apply" (click)="applyAuditFilters()">Apply</button>
+          <button class="btn-clear" (click)="clearAuditFilters()" *ngIf="hasAuditFilters">Clear</button>
+          <button class="btn-retry" (click)="loadAuditLogs()">🔄 Refresh</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="loading-state" *ngIf="auditLogsLoading()">
+      <div class="spinner-border text-primary"></div>
+      <p>Loading audit logs...</p>
+    </div>
+
+    <div class="alert-error" *ngIf="auditLogsError()">
+      {{ auditLogsError() }}
+      <button class="btn-retry" (click)="loadAuditLogs()">Retry</button>
+    </div>
+
+    <div class="empty-state" *ngIf="!auditLogsLoading() && filteredAuditLogs.length === 0 && !auditLogsError()">
+      <div class="empty-icon">🕵️</div>
+      <p>{{ hasAuditFilters ? 'No logs match your filters.' : 'No activity recorded yet.' }}</p>
+    </div>
+
+    <div class="table-card" *ngIf="!auditLogsLoading() && filteredAuditLogs.length > 0">
+
+      <!-- Row count -->
+      <div class="table-row-info">
+        Showing {{ (auditLogPage - 1) * auditLogPageSize + 1 }}–{{ Math.min(auditLogPage * auditLogPageSize, filteredAuditLogs.length) }}
+        of {{ filteredAuditLogs.length }} log(s)
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Action</th>
+              <th>Survey</th>
+              <th>Performed By</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (log of auditLogPagedItems; track log.id; let i = $index) {
+              <tr>
+                <td class="id-cell">{{ (auditLogPage - 1) * auditLogPageSize + i + 1 }}</td>
+
+                <td>
+                  <span class="action-badge {{ getActionClass(log.action) }}">
+                    {{ getActionIcon(log.action) }} {{ log.action }}
+                  </span>
+                </td>
+
+                <td class="title-cell">
+                  {{ log.surveyTitle }}
+                  <div class="survey-id-hint">ID: {{ log.surveyId }}</div>
+                </td>
+
+                <td>
+                  <div class="user-info">
+                    <div class="user-avatar">{{ log.performedBy[0].toUpperCase() }}</div>
+                    <span class="username">{{ log.performedBy }}</span>
+                  </div>
+                </td>
+
+                <td class="date-cell">
+                  {{ log.performedAt | date:'dd MMM yyyy, HH:mm' }}
+                </td>
+
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="auditLogTotalPages > 1">
+        <button class="btn-page" (click)="auditLogPage = auditLogPage - 1" [disabled]="auditLogPage === 1">← Prev</button>
+        @for (page of auditLogPageNumbers; track page) {
+          <button
+            class="btn-page-num"
+            [class.active]="page === auditLogPage"
+            (click)="auditLogPage = page"
+          >{{ page }}</button>
+        }
+        <button class="btn-page" (click)="auditLogPage = auditLogPage + 1" [disabled]="auditLogPage === auditLogTotalPages">Next →</button>
+        <span class="page-info">Page {{ auditLogPage }} of {{ auditLogTotalPages }}</span>
+      </div>
+
+      <div class="table-footer-note">
+        Showing {{ filteredAuditLogs.length }} of {{ auditLogs().length }} total log entries
+      </div>
+
     </div>
 
   </div>
@@ -237,11 +394,7 @@
 
     <div class="modal-footer">
       <button class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
-      <button
-        class="btn-danger"
-        (click)="confirmDelete()"
-        [disabled]="isDeleting()"
-      >
+      <button class="btn-danger" (click)="confirmDelete()" [disabled]="isDeleting()">
         <span *ngIf="!isDeleting()">Delete</span>
         <span *ngIf="isDeleting()">
           <span class="spinner-border spinner-border-sm me-1"></span>Deleting...

@@ -135,7 +135,7 @@
             <label>Question Type</label>
             <select class="form-input" [(ngModel)]="newQuestion.questionType">
               <option [ngValue]="QuestionType.Text">✏️ Text</option>
-              <option [ngValue]="QuestionType.Rating">⭐ Rating (1–5)</option>
+              <option [ngValue]="QuestionType.Rating">⭐ Rating (1–10)</option>
               <option [ngValue]="QuestionType.MultipleChoice">☑️ Multiple Choice</option>
             </select>
           </div>
@@ -213,7 +213,7 @@
         </button>
 
         <p class="submit-hint">
-          Survey will be created as <strong>Inactive</strong>. Activate it from the Dashboard when ready to share.
+          Survey will be created as <strong>Active</strong>. UnActivate it from the Dashboard when you to want.
         </p>
 
       </div>

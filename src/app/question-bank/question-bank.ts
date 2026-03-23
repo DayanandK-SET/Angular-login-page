@@ -21,18 +21,18 @@ export class QuestionBank {
   // Expose enum to template
   QuestionType = QuestionType;
 
-  // ── List State ───────────────────────────────────
+  //  List State 
   questions = signal<QuestionBankResponseDto[]>([]);
   isLoading = signal(true);
   errorMessage = signal('');
   totalCount = signal(0);
 
-  // ── Pagination & Filter ──────────────────────────
+  //  Pagination & Filter 
   pageNumber = 1;
   pageSize = 8;
   typeFilter: QuestionType | '' = '';
 
-  // ── Add Question Modal ───────────────────────────
+  //  Add Question Modal 
   showAddModal = signal(false);
   isSubmitting = signal(false);
   submitError = signal('');
@@ -46,7 +46,7 @@ export class QuestionBank {
     this.loadQuestions();
   }
 
-  // ── Load Questions ───────────────────────────────
+  //  Load Questions 
 
   loadQuestions() {
     this.isLoading.set(true);
@@ -100,7 +100,7 @@ export class QuestionBank {
     return Math.min(this.pageNumber * this.pageSize, this.totalCount());
   }
 
-  // ── Add Question Modal ───────────────────────────
+  //  Add Question Modal 
 
   openAddModal() {
     this.newQuestion = this.emptyForm();
@@ -175,7 +175,7 @@ export class QuestionBank {
     });
   }
 
-  // ── Helpers ──────────────────────────────────────
+  //  Helpers 
 
   getTypeName(type: QuestionType): string {
     const map: Record<number, string> = {

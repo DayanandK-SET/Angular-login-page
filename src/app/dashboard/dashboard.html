@@ -6,7 +6,12 @@
       <h1>Dashboard</h1>
       <p class="subtitle">Manage your surveys and track responses</p>
     </div>
-    <a routerLink="/create-survey" class="btn-create">+ Create Survey</a>
+    <div class="header-actions">
+      <button class="btn-import" (click)="openImportModal()">
+        📥 Import from Excel
+      </button>
+      <a routerLink="/create-survey" class="btn-create">+ Create Survey</a>
+    </div>
   </div>
 
   <!-- ── STATS CARDS ───────────────────────────── -->
@@ -34,6 +39,48 @@
     </div>
   </div>
 
+  <!-- ── FILTER BAR ────────────────────────────── -->
+  <div class="filter-card">
+
+    <div class="filter-title">🔍 Filter Surveys</div>
+
+    <div class="filter-grid">
+
+      <div class="filter-group">
+        <label>From Date</label>
+        <input type="date" class="form-input" [(ngModel)]="fromDate">
+      </div>
+
+      <div class="filter-group">
+        <label>To Date</label>
+        <input type="date" class="form-input" [(ngModel)]="toDate">
+      </div>
+
+      <div class="filter-group">
+        <label>Status</label>
+        <select class="form-input" [(ngModel)]="isActiveFilter">
+          <option [ngValue]="null">All Surveys</option>
+          <option [ngValue]="true">Active Only</option>
+          <option [ngValue]="false">Inactive Only</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-apply" (click)="applyFilters()">Apply</button>
+        <button class="btn-clear" (click)="clearFilters()" *ngIf="hasActiveFilters">Clear</button>
+      </div>
+
+    </div>
+
+    <div class="filter-summary" *ngIf="hasActiveFilters">
+      <span class="filter-tag" *ngIf="fromDate">From: {{ fromDate }}</span>
+      <span class="filter-tag" *ngIf="toDate">To: {{ toDate }}</span>
+      <span class="filter-tag" *ngIf="isActiveFilter === true">Active Only</span>
+      <span class="filter-tag" *ngIf="isActiveFilter === false">Inactive Only</span>
+    </div>
+
+  </div>
+
   <!-- ── LOADING ────────────────────────────────── -->
   <div class="loading-state" *ngIf="isLoading()">
     <div class="spinner-border text-primary" role="status"></div>
@@ -51,14 +98,25 @@
 
     <div class="table-header">
       <h2>My Surveys</h2>
-      <span class="survey-count">{{ surveys().length }} survey(s)</span>
+      <span class="survey-count">
+        <span *ngIf="totalCount() > 0">{{ startIndex }}–{{ endIndex }} of {{ totalCount() }} survey(s)</span>
+        <span *ngIf="totalCount() === 0">0 surveys</span>
+      </span>
     </div>
 
+    <!-- Empty State -->
     <div class="empty-state" *ngIf="surveys().length === 0">
-      <p>📭 You have no surveys yet.</p>
-      <a routerLink="/create-survey" class="btn-create">Create your first survey</a>
+      <p *ngIf="!hasActiveFilters">📭 You have no surveys yet.</p>
+      <p *ngIf="hasActiveFilters">🔎 No surveys match your filters.</p>
+      <a routerLink="/create-survey" class="btn-create" *ngIf="!hasActiveFilters">
+        Create your first survey
+      </a>
+      <button class="btn-clear-lg" (click)="clearFilters()" *ngIf="hasActiveFilters">
+        Clear Filters
+      </button>
     </div>
 
+    <!-- Table -->
     <div class="table-responsive" *ngIf="surveys().length > 0">
       <table>
         <thead>
@@ -80,21 +138,36 @@
               </td>
 
               <td>
-                <button
-                  class="status-badge"
-                  [class.active]="survey.isActive"
-                  [class.inactive]="!survey.isActive"
-                  [disabled]="togglingId() === survey.surveyId"
-                  (click)="toggleStatus(survey)"
-                  title="Click to toggle"
-                >
-                  <span *ngIf="togglingId() !== survey.surveyId">
-                    {{ survey.isActive ? '● Active' : '○ Inactive' }}
+                <!-- ✅ LOCKED survey — show lock badge, no toggle -->
+                <div class="toggle-wrapper" *ngIf="survey.isLocked">
+                  <span class="locked-badge" title="This survey is locked — expired or reached max responses">
+                    🔒 locked
                   </span>
-                  <span *ngIf="togglingId() === survey.surveyId">
-                    <span class="spinner-border spinner-border-sm"></span>
+                </div>
+
+                <!-- Normal survey — show toggle as before -->
+                <div class="toggle-wrapper" *ngIf="!survey.isLocked">
+                  <label
+                    class="toggle-switch"
+                    [title]="survey.isActive ? 'Click to deactivate' : 'Click to activate'"
+                  >
+                    <input
+                      type="checkbox"
+                      [checked]="survey.isActive"
+                      [disabled]="togglingId() === survey.surveyId"
+                      (change)="toggleStatus(survey)"
+                    >
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label" [class.on]="survey.isActive" [class.off]="!survey.isActive">
+                    <span *ngIf="togglingId() !== survey.surveyId">
+                      {{ survey.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                    <span *ngIf="togglingId() === survey.surveyId">
+                      <span class="spinner-border spinner-border-sm"></span>
+                    </span>
                   </span>
-                </button>
+                </div>
               </td>
 
               <td>
@@ -105,45 +178,23 @@
                 {{ survey.createdAt | date:'mediumDate' }}
               </td>
 
-              <!-- ── ACTIONS — two neat rows ─────── -->
               <td>
                 <div class="action-group">
-
-                  <!-- Row 1 -->
                   <div class="action-row">
-                    <a
-                      class="act-btn blue"
-                      [routerLink]="['/surveys', survey.surveyId, 'responses']"
-                    >📊 Responses</a>
-
-                    <a
-                      class="act-btn purple"
-                      [routerLink]="['/surveys', survey.surveyId, 'analytics']"
-                    >📈 Analytics</a>
+                    <a class="act-btn blue" [routerLink]="['/surveys', survey.surveyId, 'responses']">📊 Responses</a>
+                    <a class="act-btn purple" [routerLink]="['/surveys', survey.surveyId, 'analytics']">📈 Analytics</a>
                   </div>
-
-                  <!-- Row 2 -->
                   <div class="action-row">
                     <button
                       class="act-btn green"
                       (click)="copyPublicLink(survey)"
                       [disabled]="!survey.isActive"
-                      [title]="survey.isActive ? 'Copy public link' : 'Activate survey first'"
                     >
                       {{ copiedId() === survey.surveyId ? '✓ Copied' : '🔗 Link' }}
                     </button>
-
-                    <button
-                      class="act-btn yellow"
-                      (click)="openEditModal(survey)"
-                    >✏️ Edit</button>
-
-                    <button
-                      class="act-btn red"
-                      (click)="openDeleteModal(survey)"
-                    >🗑️</button>
+                    <button class="act-btn yellow" (click)="openEditModal(survey)">✏️ Edit</button>
+                    <button class="act-btn red" (click)="openDeleteModal(survey)">🗑️</button>
                   </div>
-
                 </div>
               </td>
 
@@ -151,6 +202,25 @@
           }
         </tbody>
       </table>
+    </div>
+
+    <!-- ── PAGINATION ─────────────────────────────── -->
+    <div class="pagination" *ngIf="totalPages > 1">
+
+      <button class="btn-page" (click)="prevPage()" [disabled]="pageNumber === 1">← Prev</button>
+
+      @for (page of pageNumbers; track page) {
+        <button
+          class="btn-page-num"
+          [class.active]="page === pageNumber"
+          (click)="goToPage(page)"
+        >{{ page }}</button>
+      }
+
+      <button class="btn-page" (click)="nextPage()" [disabled]="pageNumber === totalPages">Next →</button>
+
+      <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
+
     </div>
 
   </div>
@@ -212,5 +282,96 @@
         </span>
       </button>
     </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- IMPORT FROM EXCEL MODAL                        -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-backdrop" *ngIf="showImportModal()" (click)="closeImportModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+    <div class="modal-header-custom">
+      <h3>📥 Import Survey from Excel</h3>
+    </div>
+
+    <div class="modal-body-custom">
+
+      <div class="form-group">
+        <label>Survey Title <span class="required">*</span></label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="importTitle"
+          placeholder="Enter a title for this survey"
+          maxlength="100"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Description <span class="hint">(optional)</span></label>
+        <textarea
+          class="form-input"
+          rows="2"
+          [(ngModel)]="importDescription"
+          placeholder="Optional description"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Expiry Date <span class="hint">(optional)</span></label>
+        <input type="datetime-local" class="form-input" [(ngModel)]="importExpireAt">
+        <p class="field-hint">Survey stops accepting responses after this date</p>
+      </div>
+
+      <div class="form-group">
+        <label>Max Responses <span class="hint">(optional)</span></label>
+        <input
+          type="number"
+          class="form-input"
+          [(ngModel)]="importMaxResponses"
+          placeholder="e.g. 100"
+          min="1"
+        >
+        <p class="field-hint">Automatically closes after this many responses</p>
+      </div>
+
+      <div class="form-group">
+        <label>Excel File <span class="required">*</span></label>
+        <label class="file-upload-area">
+          <input type="file" accept=".xlsx" (change)="onFileSelected($event)" style="display: none">
+          <div class="file-upload-inner">
+            <span class="file-icon">📂</span>
+            <span class="file-label" *ngIf="!importFileName">Click to choose an .xlsx file</span>
+            <span class="file-name" *ngIf="importFileName">{{ importFileName }}</span>
+          </div>
+        </label>
+        <p class="field-hint">
+          Excel columns: <strong>Column A</strong> — Question Text,
+          <strong>Column B</strong> — Type (Text / Rating / MultipleChoice),
+          <strong>Column C+</strong> — Options (for MultipleChoice only)
+        </p>
+      </div>
+
+      <div class="alert-success" *ngIf="importSuccess()">✅ {{ importSuccess() }}</div>
+      <div class="alert-error" *ngIf="importError()">⚠️ {{ importError() }}</div>
+
+    </div>
+
+    <div class="modal-footer-custom">
+      <button class="btn-modal secondary" (click)="closeImportModal()" [disabled]="isImporting()">Cancel</button>
+      <button
+        class="btn-modal primary"
+        (click)="submitImport()"
+        [disabled]="isImporting() || !importTitle.trim() || !importFile"
+      >
+        <span *ngIf="!isImporting()">📥 Import Survey</span>
+        <span *ngIf="isImporting()">
+          <span class="spinner-border spinner-border-sm me-1"></span>Importing...
+        </span>
+      </button>
+    </div>
+
   </div>
 </div>

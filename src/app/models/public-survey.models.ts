@@ -1,11 +1,9 @@
-// =============================================
 // PUBLIC SURVEY MODELS
-// (used by public-facing survey fill page - no auth)
-// =============================================
+
 
 import { QuestionType } from './survey.models';
 
-// ---------- Get Public Survey ----------
+//  Get Public Survey 
 
 export interface PublicOptionDto {
   optionId: number;
@@ -25,7 +23,7 @@ export interface PublicSurveyDto {
   questions: PublicQuestionDto[];
 }
 
-// ---------- Submit Survey ----------
+//  Submit Survey 
 
 export interface SubmitAnswerDto {
   questionId: number;

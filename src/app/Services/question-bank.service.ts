@@ -15,10 +15,8 @@ export class QuestionBankService {
 
   constructor(private http: HttpClient) {}
 
-  // -----------------------------------------------
   // POST /api/QuestionBank
   // Create one or more questions in the bank
-  // -----------------------------------------------
   createQuestions(dtos: CreateQuestionBankDto[]) {
     return this.http.post<{ message: string; questionIds: number[] }>(
       this.baseUrl,
@@ -26,10 +24,7 @@ export class QuestionBankService {
     );
   }
 
-  // -----------------------------------------------
   // GET /api/QuestionBank/my-questions
-  // Get paginated + filtered questions for this user
-  // -----------------------------------------------
   getMyQuestions(request: GetQuestionBankRequestDto) {
     let params = new HttpParams();
 

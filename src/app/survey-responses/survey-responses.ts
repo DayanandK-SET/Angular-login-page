@@ -25,25 +25,25 @@ export class SurveyResponses {
 
   surveyId!: number;
 
-  // ── Data ─────────────────────────────────────────
+  //  Data 
   surveyData = signal<SurveyResponsesDto | null>(null);
   isLoading = signal(true);
   errorMessage = signal('');
 
-  // ── Filters ──────────────────────────────────────
+  //  Filters 
   fromDate = '';
   toDate = '';
   questionTypeFilter: QuestionType | '' = '';
 
-  // ── Pagination ────────────────────────────────────
+  //  Pagination 
   pageNumber = 1;
   pageSize = 5;
 
-  // ── Export ────────────────────────────────────────
+  //  Export 
   isExporting = signal(false);
   exportError = signal('');
 
-  // ── Expanded Responses ────────────────────────────
+  //  Expanded Responses 
   expandedIds = new Set<number>();
 
   constructor() {
@@ -51,7 +51,7 @@ export class SurveyResponses {
     this.loadResponses();
   }
 
-  // ── Load ──────────────────────────────────────────
+  //  Load 
 
   loadResponses() {
     this.isLoading.set(true);
@@ -96,7 +96,7 @@ export class SurveyResponses {
     return !!(this.fromDate || this.toDate || this.questionTypeFilter !== '');
   }
 
-  // ── Pagination ────────────────────────────────────
+  //  Pagination 
 
   nextPage() {
     if (this.pageNumber < this.totalPages) {
@@ -128,7 +128,7 @@ export class SurveyResponses {
     return (this.pageNumber - 1) * this.pageSize + responses;
   }
 
-  // ── Expand / Collapse response ────────────────────
+  //  Expand / Collapse response 
 
   toggleExpand(responseId: number) {
     if (this.expandedIds.has(responseId)) {
@@ -157,7 +157,7 @@ export class SurveyResponses {
       responses.every(r => this.expandedIds.has(r.responseId));
   }
 
-  // ── Export to Excel ───────────────────────────────
+  //  Export to Excel 
 
   exportToExcel() {
     this.isExporting.set(true);

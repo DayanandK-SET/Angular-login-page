@@ -66,33 +66,72 @@ export class Authentication {
     });
   }
 
-  register(){
-    this.registerError = '';
-    this.isRegisterLoading = true;
+  // register(){
+  //   this.registerError = '';
+  //   this.isRegisterLoading = true;
 
-    this.apiAuthService.apiRegister(this.registerModel)
-    .pipe(
-      finalize(() => {
-        this.isRegisterLoading = false;
-        this.cd.detectChanges();
-      })
-    )
-    .subscribe({
-      next:(response:any)=>{
-        if(response){
-          sessionStorage.setItem('token',response?.token);
-          alert('Register successful!');
-          this.router.navigateByUrl('')
-        }
-      },
-      error:(error)=>{
-        if(error.status === 400){
-          this.registerError = error.error?.message || 'Registration failed';
-        }
-        else{
-          this.registerError = 'Something went wrong.';
-        }
+  //   this.apiAuthService.apiRegister(this.registerModel)
+  //   .pipe(
+  //     finalize(() => {
+  //       this.isRegisterLoading = false;
+  //       this.cd.detectChanges();
+  //     })
+  //   )
+  //   .subscribe({
+  //     next:(response:any)=>{
+  //       if(response){
+  //         sessionStorage.setItem('token',response?.token);
+  //         alert('Register successful!');
+  //         this.router.navigateByUrl('')
+  //       }
+  //     },
+  //     error:(error)=>{
+  //       if(error.status === 400){
+  //         this.registerError = error.error?.message || 'Registration failed';
+  //       }
+  //       else{
+  //         this.registerError = 'Something went wrong.';
+  //       }
+  //     }
+  //   });
+  // }
+
+  register(){
+  this.registerError = '';
+  this.loginError = '';
+  this.isRegisterLoading = true;
+
+  this.apiAuthService.apiRegister(this.registerModel)
+  .pipe(
+    finalize(() => {
+      this.isRegisterLoading = false;
+      this.cd.detectChanges();
+    })
+  )
+  .subscribe({
+    next:(response:any)=>{
+      if(response){
+        // Switch to login tab
+        this.activeTab = 'login';
+
+        // Optional: prefill username in login
+        this.loginModel.username = this.registerModel.username;
+
+        // Clear register form
+        this.registerModel = new RegisterModel();
+
+        // Show success message in login tab
+        this.loginError = 'Registration successful! Please login.';
       }
-    });
-  }
+    },
+    error:(error)=>{
+      if(error.status === 400){
+        this.registerError = error.error?.message || 'Registration failed';
+      }
+      else{
+        this.registerError = 'Something went wrong.';
+      }
+    }
+  });
+}
 }

@@ -32,22 +32,22 @@ export class CreateSurvey {
   // Expose enum to template
   QuestionType = QuestionType;
 
-  // ── Survey Details ───────────────────────────────
+  //  Survey Details 
   title = '';
   description = '';
   expireAt = '';
   maxResponses: number | null = null;
 
-  // ── Questions ────────────────────────────────────
+  //  Questions 
   questions = signal<QuestionForm[]>([]);
   nextId = 1;
 
-  // ── Submit State ─────────────────────────────────
+  //  Submit State 
   isSubmitting = signal(false);
   submitError = signal('');
   submitSuccess = signal('');
 
-  // ── Question Bank Modal ───────────────────────────
+  //  Question Bank Modal 
   showBankModal = signal(false);
   bankQuestions = signal<QuestionBankResponseDto[]>([]);
   bankLoading = signal(false);
@@ -58,7 +58,7 @@ export class CreateSurvey {
   bankTypeFilter: QuestionType | '' = '';
   selectedBankIds = new Set<number>();
 
-  // ── Add Question Form (inline) ────────────────────
+  //  Add Question Form (inline) 
   showAddForm = signal(false);
   newQuestion: QuestionForm = this.emptyQuestion();
 
@@ -74,7 +74,7 @@ export class CreateSurvey {
     };
   }
 
-  // ── Add Question Manually ────────────────────────
+  //  Add Question Manually 
 
   openAddForm() {
     this.newQuestion = this.emptyQuestion();
@@ -135,7 +135,7 @@ export class CreateSurvey {
     });
   }
 
-  // ── Question Bank Modal ───────────────────────────
+  //  Question Bank Modal 
 
   openBankModal() {
     this.selectedBankIds.clear();
@@ -219,12 +219,12 @@ export class CreateSurvey {
     this.closeBankModal();
   }
 
-  // ── Helpers ──────────────────────────────────────
+  //  Helpers 
 
   getTypeName(type: QuestionType): string {
     const map: Record<number, string> = {
       [QuestionType.Text]: 'Text',
-      [QuestionType.Rating]: 'Rating (1–5)',
+      [QuestionType.Rating]: 'Rating (1–10)',
       [QuestionType.MultipleChoice]: 'Multiple Choice'
     };
     return map[type] ?? 'Unknown';
@@ -243,7 +243,7 @@ export class CreateSurvey {
     return Math.ceil(this.bankTotalCount() / this.bankPageSize);
   }
 
-  // ── Submit Survey ─────────────────────────────────
+  //  Submit Survey 
 
   submitSurvey() {
     this.submitError.set('');
