@@ -37,8 +37,8 @@
           <li class="nav-item">
             <button
               class="nav-link"
-              [class.active]="activeTab === 'login'"
-              (click)="activeTab = 'login'"
+              [class.active]="activeTab() === 'login'"
+              (click)="activeTab.set('login')"
             >
               Login
             </button>
@@ -47,8 +47,8 @@
           <li class="nav-item">
             <button
               class="nav-link"
-              [class.active]="activeTab === 'register'"
-              (click)="activeTab = 'register'"
+              [class.active]="activeTab() === 'register'"
+              (click)="activeTab.set('register')"
             >
               Register
             </button>
@@ -58,7 +58,7 @@
 
         <!-- LOGIN FORM -->
         <form
-          *ngIf="activeTab === 'login'"
+          *ngIf="activeTab() === 'login'"
           #loginForm="ngForm"
           (ngSubmit)="login()"
         >
@@ -72,7 +72,7 @@
               name="loginUsername"
               [(ngModel)]="loginModel.username"
               #loginUsername="ngModel"
-              (input)="loginError=''"
+              (input)="loginError()"
               placeholder="Enter username"
               required
             >
@@ -100,18 +100,18 @@
             </div>
           </div>
 
-          <div class="text-danger mb-2" *ngIf="loginError">
-            {{ loginError }}
+          <div class="text-danger mb-2" *ngIf="loginError()">
+            {{ loginError() }}
           </div>
 
           <!-- LOGIN BUTTON -->
           <button
             type="submit"
             class="btn btn-primary w-100"
-            [disabled]="loginForm.invalid || isLoginLoading"
+            [disabled]="loginForm.invalid || isLoginLoading()"
           >
-            <span *ngIf="!isLoginLoading">Login</span>
-            <span *ngIf="isLoginLoading">
+            <span *ngIf="!isLoginLoading()">Login</span>
+            <span *ngIf="isLoginLoading()">
               <span class="spinner-border spinner-border-sm me-2"></span>
               Logging in...
             </span>
@@ -121,7 +121,7 @@
 
         <!-- REGISTER FORM -->
         <form
-          *ngIf="activeTab === 'register'"
+          *ngIf="activeTab() === 'register'"
           #registerForm="ngForm"
           (ngSubmit)="register()"
         >
@@ -181,18 +181,18 @@
             </div>
           </div>
 
-          <div class="text-danger mb-2" *ngIf="registerError">
-            {{ registerError }}
+          <div class="text-danger mb-2" *ngIf="registerError()">
+            {{ registerError() }}
           </div>
 
           <!-- REGISTER BUTTON -->
           <button
             type="submit"
             class="btn btn-success w-100"
-            [disabled]="registerForm.invalid || isRegisterLoading"
+            [disabled]="registerForm.invalid || isRegisterLoading()"
           >
-            <span *ngIf="!isRegisterLoading">Register</span>
-            <span *ngIf="isRegisterLoading">
+            <span *ngIf="!isRegisterLoading()">Register</span>
+            <span *ngIf="isRegisterLoading()">
               <span class="spinner-border spinner-border-sm me-2"></span>
               Registering...
             </span>
